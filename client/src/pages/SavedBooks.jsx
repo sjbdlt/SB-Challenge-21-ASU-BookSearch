@@ -1,3 +1,4 @@
+import { Navigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import {
   Container,
@@ -6,41 +7,50 @@ import {
   Row,
   Col
 } from 'react-bootstrap';
-
-import { getMe, deleteBook } from '../utils/API';
+import { useQuery } from '@apollo/client';
+import { QUERY_ME } from '../utils/queries';
 import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 
 const SavedBooks = () => {
   const [userData, setUserData] = useState({});
 
-  // use this to determine if `useEffect()` hook needs to run again
-  const userDataLength = Object.keys(userData).length;
-
   useEffect(() => {
     const getUserData = async () => {
       try {
-        const token = Auth.loggedIn() ? Auth.getToken() : null;
+       
+        const { username: userParam } = useParams();
 
-        if (!token) {
-          return false;
+        const { loading, data } = useQuery(userParam ? QUERY_ME : ME, {
+          variables: { username: userParam },
+        });
+      
+        const user = data?.me || data?.user || {};
+        // navigate to personal profile page if username is yours
+        if (Auth.loggedIn()) {
+          setUserData(user);
+          return <Navigate to="/me"/>;
         }
 
-        const response = await getMe(token);
-
-        if (!response.ok) {
-          throw new Error('something went wrong!');
+        if (loading) {
+          return <div>Loading...</div>;
         }
 
-        const user = await response.json();
-        setUserData(user);
+        if (!user?.username) {
+          return (
+            <h4>
+              You need to be logged!
+            </h4>
+          );
+        }
+        
       } catch (err) {
         console.error(err);
       }
     };
 
     getUserData();
-  }, [userDataLength]);
+  });
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
@@ -51,7 +61,11 @@ const SavedBooks = () => {
     }
 
     try {
-      const response = await deleteBook(bookId, token);
+      const response = await deleteBook({
+        variables: {
+          bookId
+        },
+      });
 
       if (!response.ok) {
         throw new Error('something went wrong!');
