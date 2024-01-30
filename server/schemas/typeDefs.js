@@ -1,16 +1,16 @@
 const typeDefs = `
 
 type User {
-    _id: ID
+    _id: ID!
     username: String
     email: String
     password: String
-    savedBooks: [Book]!
+    savedBooks: [Book]
 
 }
 
 type Book {
-    _id: ID
+    _id: ID!
     authors: [String]!
     description: String
     bookId: String
@@ -26,6 +26,7 @@ type Auth {
 }
 
 type Query {
+    users: [User]
     me: User    
 }
 
