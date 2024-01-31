@@ -7,19 +7,14 @@ import {
   Card,
   Row
 } from 'react-bootstrap';
-
-import { useMutation } from '@apollo/client';
-
-import { SAVE_BOOK } from '../utils/mutations';
-
 import Auth from '../utils/auth';
 import { searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
-
+import { useMutation } from '@apollo/client';
+import { SAVE_BOOK } from '../utils/mutations';
 
 const SearchBooks = () => {
-
-  const [savebook, { error }] = useMutation(SAVE_BOOK);
+ 
 
   // create state for holding returned google api data
   const [searchedBooks, setSearchedBooks] = useState([]);
@@ -28,6 +23,8 @@ const SearchBooks = () => {
 
   // create state to hold saved bookId values
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
+
+  const [savebook ] = useMutation(SAVE_BOOK);
 
   // set up useEffect hook to save `savedBookIds` list to localStorage on component unmount
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
@@ -130,6 +127,8 @@ const SearchBooks = () => {
         </h2>
         <Row>
           {searchedBooks.map((book) => {
+
+
             return (
               <Col md="4" key={book.bookId}>
                 <Card border='dark'>
@@ -140,7 +139,7 @@ const SearchBooks = () => {
                     <Card.Title>{book.title}</Card.Title>
                     <p className='small'>Authors: {book.authors}</p>
                     <Card.Text>{book.description}</Card.Text>
-                    {Auth.loggedIn() && (
+                    
                       <Button
                         disabled={savedBookIds?.some((savedBookId) => savedBookId === book.bookId)}
                         className='btn-block btn-info'
@@ -149,7 +148,7 @@ const SearchBooks = () => {
                           ? 'This book has already been saved!'
                           : 'Save this Book!'}
                       </Button>
-                    )}
+                 
                   </Card.Body>
                 </Card>
               </Col>
